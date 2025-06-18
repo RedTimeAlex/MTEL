@@ -2,9 +2,9 @@
 #include "mtellib/Types.h"
 #include <stdlib.h>
 
-#define COMMANDS_SYSTEM_SIZE (*(MTEL_LIB_TYPE_size*)context->command_system)
-#define COMMANDS_SYSTEM_COMMAND_COUNT (*((MTEL_LIB_TYPE_size*)context->command_system+1))
-#define COMMANDS_SYSTEM_COMMAND_ARRAY ((struct command* )((MTEL_LIB_TYPE_size*)context->command_system+2))
+#define COMMANDS_SYSTEM_SIZE (*(MTEL_LIB_TYPE_command_id*)context->command_system)
+#define COMMANDS_SYSTEM_COMMAND_COUNT (*((MTEL_LIB_TYPE_command_id*)context->command_system+1))
+#define COMMANDS_SYSTEM_COMMAND_ARRAY ((struct command* )((MTEL_LIB_TYPE_command_id*)context->command_system+2))
 
 struct command{
 	char* name;
@@ -12,9 +12,9 @@ struct command{
 	MTEL_LIB_TYPE_command_flags flags;
 };
 
-int MTEL_LIB_command_system_create(MTEL_LIB_context* context,MTEL_LIB_TYPE_size size){
+int MTEL_LIB_command_system_create(MTEL_LIB_context* context,MTEL_LIB_TYPE_command_id size){
 	if(!context) return 1;
-	context->command_system = malloc(2*sizeof(MTEL_LIB_TYPE_size)+size*sizeof(struct command));
+	context->command_system = malloc(2*sizeof(MTEL_LIB_TYPE_command_id)+size*sizeof(struct command));
 	if(!context->command_system) return 2;
 	COMMANDS_SYSTEM_SIZE = size;
 	COMMANDS_SYSTEM_COMMAND_COUNT=0;
@@ -24,8 +24,7 @@ int MTEL_LIB_command_system_create(MTEL_LIB_context* context,MTEL_LIB_TYPE_size 
 void MTEL_LIB_command_system_destruct(MTEL_LIB_context* context){
 	if(!context) return;
 	while(COMMANDS_SYSTEM_COMMAND_COUNT){
-		free(COMMANDS_SYSTEM_COMMAND_ARRAY[COMMANDS_SYSTEM_COMMAND_COUNT].name);
-		COMMANDS_SYSTEM_COMMAND_COUNT--;
+		free(COMMANDS_SYSTEM_COMMAND_ARRAY[--COMMANDS_SYSTEM_COMMAND_COUNT].name);
 	}
 
 	free(context->command_system);
@@ -62,7 +61,7 @@ MTEL_LIB_TYPE_command_id MTEL_LIB_command_system_get_type_for_name(MTEL_LIB_cont
 	if(!context) return 0;
 	if(!name) return 0;
 
-	for(MTEL_LIB_TYPE_size i = 0; i < COMMANDS_SYSTEM_COMMAND_COUNT;i++){
+	for(MTEL_LIB_TYPE_command_id i = 0; i < COMMANDS_SYSTEM_COMMAND_COUNT;i++){
 		MTEL_LIB_TYPE_size cmp = 0;	
 		while(COMMANDS_SYSTEM_COMMAND_ARRAY[i].name[cmp]!='\0' && name[cmp]!='\0'){
 			if(COMMANDS_SYSTEM_COMMAND_ARRAY[i].name[cmp]!=name[cmp]){

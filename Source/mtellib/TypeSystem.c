@@ -2,18 +2,18 @@
 #include "mtellib/Types.h"
 #include <stdlib.h>
 
-#define TYPE_SYSTEM_SIZE (*(MTEL_LIB_TYPE_size*)context->type_system)
-#define TYPE_SYSTEM_TYPE_COUNT (*((MTEL_LIB_TYPE_size*)context->type_system+1))
-#define TYPE_SYSTEM_TYPES_ARRAY ((struct type* )((MTEL_LIB_TYPE_size*)context->type_system+2))
+#define TYPE_SYSTEM_SIZE (*(MTEL_LIB_TYPE_type_id*)context->type_system)
+#define TYPE_SYSTEM_TYPE_COUNT (*((MTEL_LIB_TYPE_type_id*)context->type_system+1))
+#define TYPE_SYSTEM_TYPES_ARRAY ((struct type* )((MTEL_LIB_TYPE_type_id*)context->type_system+2))
 
 struct type{
 	char* name;
 	MTEL_LIB_TYPE_size size;
 };
 
-int MTEL_LIB_type_system_create(MTEL_LIB_context* context,MTEL_LIB_TYPE_size size){
+int MTEL_LIB_type_system_create(MTEL_LIB_context* context,MTEL_LIB_TYPE_type_id size){
 	if(!context) return 1;
-	context->type_system = malloc(2*sizeof(MTEL_LIB_TYPE_size)+size*sizeof(struct type));
+	context->type_system = malloc(2*sizeof(MTEL_LIB_TYPE_type_id)+size*sizeof(struct type));
 	if(!context->type_system) return 2;
 	TYPE_SYSTEM_SIZE = size;
 	TYPE_SYSTEM_TYPE_COUNT=0;
@@ -22,8 +22,7 @@ int MTEL_LIB_type_system_create(MTEL_LIB_context* context,MTEL_LIB_TYPE_size siz
 
 void MTEL_LIB_type_system_destruct(MTEL_LIB_context* context){
 	while(TYPE_SYSTEM_TYPE_COUNT){
-		free(TYPE_SYSTEM_TYPES_ARRAY[TYPE_SYSTEM_TYPE_COUNT].name);
-		TYPE_SYSTEM_TYPE_COUNT--;
+		free(TYPE_SYSTEM_TYPES_ARRAY[--TYPE_SYSTEM_TYPE_COUNT].name);
 	}
 
 	free(context->type_system);

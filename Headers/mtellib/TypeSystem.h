@@ -3,7 +3,7 @@
 
 #include "mtellib/Types.h"
 
-int MTEL_LIB_type_system_create(MTEL_LIB_context* context,MTEL_LIB_TYPE_size size);
+int MTEL_LIB_type_system_create(MTEL_LIB_context* context,MTEL_LIB_TYPE_type_id size);
 
 void MTEL_LIB_type_system_destruct(MTEL_LIB_context* context);
 
