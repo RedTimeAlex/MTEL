@@ -18,4 +18,10 @@ typedef struct MTEL_LIB_stack MTEL_LIB_stack;
 struct MTEL_LIB_command_system;
 typedef struct MTEL_LIB_command_system MTEL_LIB_command_system;
 
+typedef struct{
+	MTEL_LIB_type_system*	 type_system;
+	MTEL_LIB_stack* 	 	 stack;
+	MTEL_LIB_command_system* command_system;
+} MTEL_LIB_context;
+
 #endif //MTEL_LIB_TYPES_H_

@@ -8,22 +8,22 @@
 
 void MTEL_test(struct MTEL_LIB_stack* stack);
 
-void add(struct MTEL_LIB_stack* stack,struct MTEL_LIB_type_system* type_system){
+void add(MTEL_LIB_context* context){
 	int a = 0;
 	int b = 0;
-	MTEL_LIB_stack_pop(stack, &a, type_system);
-	MTEL_LIB_stack_pop(stack, &b, type_system);
+	MTEL_LIB_stack_pop(context, &a);
+	MTEL_LIB_stack_pop(context, &b);
 	a += b;
-	MTEL_LIB_stack_push(stack, &a, type_system, MTEL_LIB_type_system_get_type_for_name(type_system,"int32"));
+	MTEL_LIB_stack_push(context, &a, MTEL_LIB_type_system_get_type_for_name(context,"int32"));
 }
 
-void printInt(struct MTEL_LIB_stack* stack,struct MTEL_LIB_type_system* type_system){
+void printInt(MTEL_LIB_context* context){
 	int a = 0;
-	MTEL_LIB_stack_pop(stack, &a, type_system);
+	MTEL_LIB_stack_pop(context, &a);
 	printf("int: %d\n", a);
 }
 
-int read_token(FILE* file,char* buffer, int buffersize, MTEL_LIB_command_system* command_sytem){
+int read_token(FILE* file,char* buffer, int buffersize, MTEL_LIB_context* context){
 	char c ;
 	do{
 		c = getc(file);
@@ -69,7 +69,7 @@ int read_token(FILE* file,char* buffer, int buffersize, MTEL_LIB_command_system*
 	}
 	else{
 		buffer[0] = MTEL_LIB_BYTE_CODE_COMMAND;	
-		*(MTEL_LIB_TYPE_command_id*)(buffer+1) = MTEL_LIB_command_system_get_type_for_name(command_sytem, buffer+1);
+		*(MTEL_LIB_TYPE_command_id*)(buffer+1) = MTEL_LIB_command_system_get_type_for_name(context, buffer+1);
 		buffer[1+sizeof(MTEL_LIB_TYPE_command_id)] = MTEL_LIB_BYTE_CODE_END;
 	}
 	if(c==EOF) return -1;
@@ -84,25 +84,27 @@ int main(int argc,char ** argv)
 		return 1;
 	}
 	//PROGRAMM INIT
-	struct MTEL_LIB_type_system* typeSystem = MTEL_LIB_type_system_create(2);
-	struct MTEL_LIB_stack* 		 stack  	= MTEL_LIB_stack_create(20);
-	struct MTEL_LIB_command_system* command_sytem = MTEL_LIB_command_system_create(2);
+	MTEL_LIB_context context = {};
+	
+	MTEL_LIB_type_system_create(&context,2);
+	MTEL_LIB_stack_create(&context, 128);
+	MTEL_LIB_command_system_create(&context,2);
 
-	MTEL_LIB_type_system_add_type(typeSystem,"int8",1);
-	MTEL_LIB_type_system_add_type(typeSystem,"int32",4);
-	MTEL_LIB_command_system_add_command(command_sytem, "add", MTEL_LIB_COMMAND_FLAG_EXTR, &add);
-	MTEL_LIB_command_system_add_command(command_sytem, "printInt", MTEL_LIB_COMMAND_FLAG_EXTR, &printInt);
+	MTEL_LIB_type_system_add_type(&context,"int8",1);
+	MTEL_LIB_type_system_add_type(&context,"int32",4);
+	MTEL_LIB_command_system_add_command(&context, "add", MTEL_LIB_COMMAND_FLAG_EXTR, &add);
+	MTEL_LIB_command_system_add_command(&context, "printInt", MTEL_LIB_COMMAND_FLAG_EXTR, &printInt);
 
 	FILE* file = fopen(argv[1], "r");
 	char buffer[128] = {};
 
-	while(!read_token(file, buffer,128, command_sytem)) {
-		MTEL_LIB_execute(typeSystem, stack, command_sytem, buffer);
+	while(!read_token(file, buffer,128, &context)) {
+		MTEL_LIB_execute(&context, buffer);
 	}
 
 	fclose(file);
 
-	MTEL_LIB_command_system_destruct(command_sytem);
-	MTEL_LIB_type_system_destruct(typeSystem);
-	MTEL_LIB_stack_destuct(stack);
+	MTEL_LIB_command_system_destruct(&context);
+	MTEL_LIB_type_system_destruct(&context);
+	MTEL_LIB_stack_destuct(&context);
 }
